@@ -26,17 +26,24 @@ z_list = []
 for file in filenames:
    # reading csv files
    d = pd.read_csv(file, sep=';')
+   
+   #drop duplicated columns: columns with period present
+   d.drop([col for col in d.columns if '.' in col],axis=1, inplace=True)
+   #drop duplicated rows
+   d = d.drop_duplicates(subset=['Matrix'])
+
    file_name = file.rsplit(' ', 1)[1]
    file_name = file_name.rsplit('.', 1)[0]   
    #d.to_excel(newpath+"\\"+file_name + ".xlsx", index = False)  
-   
    #z-score
    d_indexed = d.set_index('Matrix')
+   #drop duplicated columns by identifying where columns have a period
+   
    
    ##(1/2)log( (1+r)/(1-r))
    numeric_cols = [col for col in d_indexed if d_indexed[col].dtype.kind != 'O']
    d_z_score = (1+d_indexed[numeric_cols]) / (1-d_indexed[numeric_cols])
-   d_z_score = np.log10(d_calc) / 2
+   d_z_score = np.log10(d_z_score) / 2
    d_z_score.reset_index(drop=False, inplace=True)
 
    #Export
@@ -60,7 +67,7 @@ n_matrix = df_final.groupby('Matrix').count()
 #file name
 updated_file_name = file_name.split('_', 1)[-1]
 updated_file_name = updated_file_name.split("_")[0]
-
+  
 nextpath = path+'/Calculated'
 if not os.path.exists(nextpath):
    os.makedirs(nextpath)
